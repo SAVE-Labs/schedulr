@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+docker-compose.yaml
+Dockerfile
+.docker
+.dockerignore
+
+# Virtual environment
+.venv/
+venv/
+
+# Data
+data/
+staticfiles/
+
+# General
+README.md
