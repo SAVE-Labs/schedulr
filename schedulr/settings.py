@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "schedulr.account.apps.AccountConfig",
+    "schedulr.event.apps.EventConfig",
 ]
 
 MIDDLEWARE = [

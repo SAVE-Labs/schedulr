@@ -17,7 +17,6 @@ class SetupCompletedMixin:
     setup_completed_url = "login"
 
     def dispatch(self, request, *args, **kwargs):
-        print("WALDO2")
         if User.objects.exists():
             return redirect(self.setup_completed_url)
         return super().dispatch(request, *args, **kwargs)

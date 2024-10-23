@@ -16,7 +16,7 @@ class InitialSetupView(SetupCompletedMixin, edit.FormView):
     success_url = "login"
 
     def form_valid(self, form):
-        User.objects.create_user(
+        User.objects.create_superuser(
             email=form.cleaned_data["email"],
             password=form.cleaned_data["password"],
         )
