@@ -10,3 +10,7 @@ class InitialSetupForm(forms.Form):
         password = self.cleaned_data["password"]
         password_validation.validate_password(password)
         return password
+
+
+class SessionSetupForm(forms.Form):
+    name = forms.CharField(required=True)

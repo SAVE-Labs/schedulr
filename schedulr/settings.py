@@ -77,6 +77,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "schedulr.wsgi.application"
 
+# TODO: Session expiry etc.
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

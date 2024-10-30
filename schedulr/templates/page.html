@@ -163,7 +163,9 @@
 
     <header class="bg-white shadow-sm">
         <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-            <!-- <h1 class="text-lg font-semibold leading-6 text-gray-900">Dashboard</h1> -->
+            {% if 'name' in request.session %}
+            <h1 class="text-lg font-semibold leading-6 text-gray-900">Hi {{ request.session.name }}</h1>
+            {% endif %}
             <div class="flex flex-wrap items-center gap-6 sm:flex-nowrap">
                 <h1 class="text-base font-semibold leading-7 text-gray-900">
                     {% block header_title %}
