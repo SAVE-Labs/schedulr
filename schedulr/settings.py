@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "django.contrib.auth",
+    "unfold",
     "django.contrib.admin",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
