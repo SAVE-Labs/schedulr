@@ -18,12 +18,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from schedulr.account.views import Homepage, InitialSetupView, LoginView, LogoutView
+from schedulr.account.views import Homepage, InitialSetupView
 
 urlpatterns = [
     path("", Homepage.as_view(), name="homepage"),
-    path("account/login", LoginView.as_view(), name="login"),
-    path("account/logout", LogoutView.as_view(), name="logout"),
     path(
         "account/initial-setup",
         InitialSetupView.as_view(),

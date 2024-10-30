@@ -108,8 +108,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = "account.User"
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "homepage"
+LOGIN_URL = "admin:login"
+LOGIN_REDIRECT_URL = "admin:index"
 
 
 # Internationalization

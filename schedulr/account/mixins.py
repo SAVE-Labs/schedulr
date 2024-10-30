@@ -14,7 +14,7 @@ class InitialSetupRequiredMixin:
 
 
 class SetupCompletedMixin:
-    setup_completed_url = "login"
+    setup_completed_url = "admin:login"
 
     def dispatch(self, request, *args, **kwargs):
         if User.objects.exists():
