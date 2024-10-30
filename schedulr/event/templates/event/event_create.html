@@ -1,0 +1,68 @@
+{% extends "page.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gray-50">
+    <div class="w-full max-w-lg p-8 bg-white shadow-2xl rounded-xl">
+        <h2 class="text-3xl font-semibold text-center text-gray-800 mb-8">{% translate "Create a New Event" %}</h2>
+
+        <form class="space-y-6" method="POST" action="">
+            {% csrf_token %}
+
+            <!-- Event Name -->
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">{% translate "Event Name" %}</label>
+                <div class="mt-2">
+                    <input type="text" id="name" name="name" required
+                           class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">{% translate "Description" %}</label>
+                <div class="mt-2">
+                    <textarea id="description" name="description" rows="4"
+                              class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                </div>
+            </div>
+
+            <!-- Schedule Options -->
+            <div id="schedule-options" class="space-y-4">
+                <label class="block text-sm font-medium text-gray-700 mt-4">{% translate "Schedule Options" %}</label>
+                <div class="flex space-x-4 mt-2 mb-4">
+                    <input type="date" name="schedule_date[]"
+                           class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <button type="button" onclick="addDateField()"
+                        class="text-sm font-medium text-indigo-600 hover:text-indigo-500">{% translate "+ Add Another Date" %}</button>
+            </div>
+
+            <!-- Submit Button -->
+            <div>
+                <button type="submit"
+                        class="w-full flex justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                    {% translate "Create Event" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript for Form Logic -->
+<script>
+    function addDateField() {
+        const scheduleOptions = document.getElementById('schedule-options');
+        const dateDiv = document.createElement('div');
+        dateDiv.classList.add('flex', 'space-x-4', 'mt-2', 'mb-2');
+
+        const dateInput = document.createElement('input');
+        dateInput.type = 'date';
+        dateInput.name = 'schedule_date[]';
+        dateInput.classList.add('block', 'w-full', 'rounded-lg', 'border-gray-300', 'shadow-sm', 'focus:ring-indigo-500', 'focus:border-indigo-500', 'sm:text-sm');
+
+        dateDiv.appendChild(dateInput);
+        scheduleOptions.insertBefore(dateDiv, scheduleOptions.querySelector('button'));
+    }
+</script>
+{% endblock content %}

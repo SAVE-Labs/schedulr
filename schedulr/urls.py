@@ -18,7 +18,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from schedulr.account.views import Homepage, InitialSetupView
+from schedulr.account.views import InitialSetupView
+from schedulr.event.views import Homepage
 
 urlpatterns = [
     path("", Homepage.as_view(), name="homepage"),

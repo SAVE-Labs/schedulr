@@ -4,9 +4,13 @@ from unfold.admin import ModelAdmin
 from .models import Event, Invitee, ScheduleOption, SelectedOption
 
 
+class ScheduleOptionInline(admin.TabularInline):
+    model = ScheduleOption
+
+
 @admin.register(Event)
 class EventAdmin(ModelAdmin):
-    pass
+    inlines = [ScheduleOptionInline]
 
 
 @admin.register(Invitee)
