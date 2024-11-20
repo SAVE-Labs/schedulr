@@ -1,8 +1,25 @@
 {% extends 'page.html' %}
+{% load i18n %}
 
 {% block content %}
 <h1>{{ object.name }}</h1>
-{% for option in object.scheduleoption_set.all %}
-<p>{{ option.option }}</p>
-{% endfor %}
+<h2>{{ object.description }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+
+    {% for form in formset %}
+    {{ form.option.as_hidden }}
+    {{ form.timestamp }}
+    {{ form.choice }}
+    <br />
+    {% endfor %}
+
+    <div>
+        <button type="submit"
+            class="w-full flex justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500">
+            {% translate "Submit" %}
+        </button>
+    </div>
+</form>
 {% endblock content %}
