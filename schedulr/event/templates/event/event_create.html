@@ -63,6 +63,23 @@
 <link rel="stylesheet" href="{% static 'flatpicker/flatpickr.min.css' %}">
 <script src="{% static 'flatpicker/flatpickr.min.js' %}"></script>
 
+<style>
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange,
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover {
+        background-color: #6366f1;
+        border-color: #6366f1;
+        color: white;
+    }
+
+    .flatpickr-day.today {
+        border-color: #6366f1;
+    }
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const userLang = navigator.language || navigator.userLanguage;
