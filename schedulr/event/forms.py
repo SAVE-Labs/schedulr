@@ -12,8 +12,7 @@ class SelectOptionForm(forms.ModelForm):
         ],
         initial="no",
     )
-    timestamp = forms.DateTimeField(disabled=True, required=False)
 
     class Meta:
         model = SelectedOption
-        fields = ["option", "choice", "timestamp"]
+        fields = ["option", "choice"]

@@ -4,13 +4,17 @@
 {% block content %}
 <h1>{{ object.name }}</h1>
 <h2>{{ object.description }}</h2>
+{% if formset.errors %}
+{{ formset.errors }}
+{% endif %}
+
 <form method="post">
     {% csrf_token %}
     {{ formset.management_form }}
 
     {% for form in formset %}
+    {{ form.initial.option.option }}
     {{ form.option.as_hidden }}
-    {{ form.timestamp }}
     {{ form.choice }}
     <br />
     {% endfor %}

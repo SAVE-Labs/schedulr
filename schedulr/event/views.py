@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib.auth.views import redirect_to_login
 from django.forms import formset_factory
 from django.shortcuts import redirect, render
@@ -31,24 +33,34 @@ class EventDetail(DetailView):
     template_name = "event/event_detail.html"
     queryset = Event.objects.all()
 
+    def _build_formset_data(self):
+        form_data = []
+
+        for option in self.object.scheduleoption_set.all():
+            option_data = {}
+            option_data["option"] = option
+            selected_option = option.selectedoption_set.filter(
+                invitee__name=self.name_in_session
+            ).first()
+            if selected_option:
+                option_data["choice"] = (
+                    "tentative" if selected_option.tentative else "yes"
+                )
+            form_data.append(option_data)
+
+        return form_data
+
     def get(self, request, *args, **kwargs):
         if not request.session.get("name"):
             path = request.get_full_path()
             return redirect_to_login(path, "whoami")
 
-        SelectOptionFormSet = formset_factory(SelectOptionForm, extra=0)
         self.object = self.get_object()
+        self.name_in_session = request.session.get("name")
 
-        form_data = []
-        for option in self.object.scheduleoption_set.all():
-            form_data.append(
-                {
-                    "option": option,
-                    "timestamp": option.option,
-                }
-            )
+        SelectOptionFormSet = formset_factory(SelectOptionForm, extra=0)
 
-        formset = SelectOptionFormSet(initial=form_data)
+        formset = SelectOptionFormSet(initial=self._build_formset_data())
 
         context = self.get_context_data(object=self.object)
 
@@ -68,22 +80,23 @@ class EventDetail(DetailView):
         SelectOptionFormSet = formset_factory(SelectOptionForm)
 
         formset = SelectOptionFormSet(request.POST, request.FILES)
+
+        context = self.get_context_data(object=self.object)
+        context["formset"] = formset
+
         if formset.is_valid():
             for form in formset:
                 if form.cleaned_data["choice"] != "no":
                     from .models import Invitee, SelectedOption
 
-                    SelectedOption.objects.create(
+                    SelectedOption.objects.update_or_create(
                         option=form.cleaned_data["option"],
                         invitee=Invitee.objects.get_or_create(
                             name=name, event=self.object
                         )[0],
-                        tentative=form.cleaned_data["choice"] == "tentative",
+                        defaults={
+                            "tentative": form.cleaned_data["choice"] == "tentative",
+                        },
                     )
 
-            context = self.get_context_data(object=self.object)
-            return self.render_to_response(context)
-        print(formset.errors)
-
-        context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
