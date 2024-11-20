@@ -60,7 +60,6 @@
     </div>
 </div>
 
-<!-- Include flatpickr library locally -->
 <link rel="stylesheet" href="{% static 'flatpicker/flatpickr.min.css' %}">
 <script src="{% static 'flatpicker/flatpickr.min.js' %}"></script>
 
@@ -85,23 +84,40 @@
     document.addEventListener('DOMContentLoaded', function () {
         const userLang = navigator.language || navigator.userLanguage;
         const locale = userLang.split('-')[0];
-        const localesUsing24Hour = ['nl', 'fr', 'de', 'es', 'it'];
 
-        // Initialize the initial datetime-picker field
-        flatpickr(document.getElementById('initial-datetime-picker'), {
-            enableTime: true,
-            time_24hr: localesUsing24Hour.includes(locale),
-            locale: locale || 'en',
-        });
+        function loadLocaleScript(locale, callback) {
+            const script = document.createElement('script');
+            if (locale === 'en') {
+                callback();
+                return;
+            }
+            script.src = `{% static 'flatpicker/l10n/' %}${locale}.js`;
+            script.onload = callback;
+            script.onerror = function() {
+                // Fallback to default locale if the script fails to load
+                const fallbackScript = document.createElement('script');
+                fallbackScript.src = `{% static 'flatpicker/l10n/default.js' %}`;
+                fallbackScript.onload = callback;
+                document.head.appendChild(fallbackScript);
+            };
+            document.head.appendChild(script);
+        }
 
-        // Initialize all other existing datetime-picker fields
-        document.querySelectorAll('.datetime-picker').forEach(field => {
-            flatpickr(field, {
+        function initializeFlatpickr() {
+            flatpickr(document.getElementById('initial-datetime-picker'), {
                 enableTime: true,
-                time_24hr: localesUsing24Hour.includes(locale),
                 locale: locale || 'en',
             });
-        });
+
+            document.querySelectorAll('.datetime-picker').forEach(field => {
+                flatpickr(field, {
+                    enableTime: true,
+                    locale: locale || 'en',
+                });
+            });
+        }
+
+        loadLocaleScript(locale, initializeFlatpickr);
 
         function addDateField() {
             const scheduleOptions = document.getElementById('schedule-options');
@@ -114,7 +130,6 @@
         `;
             scheduleOptions.insertBefore(newField, scheduleOptions.lastElementChild);
 
-            // Reinitialize Flatpickr for the new input field
             flatpickr(newField.querySelector('.datetime-picker'), {
                 enableTime: true,
                 time_24hr: localesUsing24Hour.includes(locale),
@@ -122,7 +137,6 @@
             });
         }
 
-        // Make addDateField function available globally
         window.addDateField = addDateField;
     });
 </script>
