@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.views.generic import DetailView, TemplateView
 
 from .forms import SelectOptionForm
-from .models import Event, ScheduleOption
+from .models import Event, Invitee, ScheduleOption, SelectedOption
 
 
 class Homepage(TemplateView):
@@ -85,18 +85,22 @@ class EventDetail(DetailView):
         context["formset"] = formset
 
         if formset.is_valid():
+            invitee, created = Invitee.objects.get_or_create(
+                name=name, event=self.object
+            )
             for form in formset:
                 if form.cleaned_data["choice"] != "no":
-                    from .models import Invitee, SelectedOption
-
                     SelectedOption.objects.update_or_create(
                         option=form.cleaned_data["option"],
-                        invitee=Invitee.objects.get_or_create(
-                            name=name, event=self.object
-                        )[0],
+                        invitee=invitee,
                         defaults={
                             "tentative": form.cleaned_data["choice"] == "tentative",
                         },
                     )
+                else:
+                    SelectedOption.objects.filter(
+                        option=form.cleaned_data["option"],
+                        invitee=invitee,
+                    ).delete()
 
         return self.render_to_response(context)
