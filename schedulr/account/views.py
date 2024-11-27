@@ -28,5 +28,5 @@ class SessionSetupView(RedirectURLMixin, edit.FormView):
     form_class = SessionSetupForm
 
     def form_valid(self, form):
-        self.request.session["name"] = form.cleaned_data["name"]
+        self.request.session["name"] = form.cleaned_data["name"].lower()
         return super().form_valid(form)
