@@ -36,7 +36,7 @@ class EventDetail(DetailView):
     def _build_formset_data(self):
         form_data = []
 
-        for option in self.object.scheduleoption_set.all():
+        for option in self.object.scheduleoption_set.all().order_by("option"):
             option_data = {}
             option_data["option"] = option
             selected_option = option.selectedoption_set.filter(
@@ -74,19 +74,21 @@ class EventDetail(DetailView):
             path = request.get_full_path()
             return redirect_to_login(path, "whoami")
 
-        name = request.session.get("name")
+        self.name_in_session = request.session.get("name")
         self.object = self.get_object()
 
-        SelectOptionFormSet = formset_factory(SelectOptionForm)
+        SelectOptionFormSet = formset_factory(SelectOptionForm, extra=0)
 
-        formset = SelectOptionFormSet(request.POST, request.FILES)
+        formset = SelectOptionFormSet(
+            request.POST, request.FILES, initial=self._build_formset_data()
+        )
 
         context = self.get_context_data(object=self.object)
         context["formset"] = formset
 
         if formset.is_valid():
             invitee, created = Invitee.objects.get_or_create(
-                name=name, event=self.object
+                name=self.name_in_session, event=self.object
             )
             for form in formset:
                 if form.cleaned_data["choice"] != "no":

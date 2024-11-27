@@ -19,6 +19,21 @@ class ScheduleOption(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     option = models.DateTimeField()
 
+    def selected_context(self):
+        selected_by = self.selectedoption_set.all().select_related("invitee")
+        context = {
+            "yes": [],
+            "tentative": [],
+        }
+        for selected in selected_by:
+            invitee_name = selected.invitee.name
+            if selected.tentative:
+                context["tentative"].append(invitee_name)
+            else:
+                context["yes"].append(invitee_name)
+
+        return context
+
 
 class Invitee(models.Model):
     name = models.CharField(max_length=255)

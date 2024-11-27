@@ -20,11 +20,21 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Date
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Option
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Yes
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Tentative
                         </th>
                     </tr>
                 </thead>
@@ -38,18 +48,32 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                             <div class="flex items-center space-x-4">
                                 <label>
-                                    <input type="radio" name="choice_{{ forloop.counter }}" value="no" {% if form.choice.value == "no" %}checked{% endif %}>
+                                    <input type="radio" name="{{ form.choice.html_name }}" value="no" {% if form.choice.value == "no" %}checked{% endif %}>
                                     No
                                 </label>
                                 <label>
-                                    <input type="radio" name="choice_{{ forloop.counter }}" value="yes" {% if form.choice.value == "yes" %}checked{% endif %}>
+                                    <input type="radio" name="{{ form.choice.html_name }}" value="yes" {% if form.choice.value == "yes" %}checked{% endif %}>
                                     Yes
                                 </label>
                                 <label>
-                                    <input type="radio" name="choice_{{ forloop.counter }}" value="tentative" {% if form.choice.value == "tentative" %}checked{% endif %}>
+                                    <input type="radio" name="{{ form.choice.html_name }}" value="tentative" {% if form.choice.value == "tentative" %}checked{% endif %}>
                                     Tentative
                                 </label>
                             </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                            <ul class="list-none">
+                                {% for name in form.initial.option.selected_context.yes %}
+                                <li>{{ name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                            <ul class="list-none">
+                            {% for name in form.initial.option.selected_context.tentative %}
+                            <li>{{ name }}</li>
+                            {% endfor %}
+                            </ul>
                         </td>
                     </tr>
                     {% endfor %}
