@@ -10,6 +10,28 @@ from .forms import SelectOptionForm
 from .models import Event, Invitee, ScheduleOption, SelectedOption
 
 
+class NameRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        # Try to dispatch to the right method; if a method doesn't exist,
+        # defer to the error handler. Also defer to the error handler if the
+        # request method isn't on the approved list.
+        if request.method.lower() in self.http_method_names:
+            handler = getattr(
+                self, request.method.lower(), self.http_method_not_allowed
+            )
+        else:
+            handler = self.http_method_not_allowed
+
+        if handler == self.http_method_not_allowed:
+            return handler
+
+        if not request.session.get("name"):
+            path = request.get_full_path()
+            return redirect_to_login(path, "whoami")
+
+        return handler(request, *args, **kwargs)
+
+
 class Homepage(TemplateView):
     template_name = "event/event_create.html"
 
@@ -29,7 +51,7 @@ class Homepage(TemplateView):
         return render(request, self.template_name)
 
 
-class EventDetail(DetailView):
+class EventDetail(NameRequiredMixin, DetailView):
     template_name = "event/event_detail.html"
     queryset = Event.objects.all()
 
@@ -51,10 +73,6 @@ class EventDetail(DetailView):
         return form_data
 
     def get(self, request, *args, **kwargs):
-        if not request.session.get("name"):
-            path = request.get_full_path()
-            return redirect_to_login(path, "whoami")
-
         self.object = self.get_object()
         self.name_in_session = request.session.get("name")
 
@@ -63,17 +81,11 @@ class EventDetail(DetailView):
         formset = SelectOptionFormSet(initial=self._build_formset_data())
 
         context = self.get_context_data(object=self.object)
-
         context["formset"] = formset
 
         return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):
-        # TODO: Mixin?
-        if not request.session.get("name"):
-            path = request.get_full_path()
-            return redirect_to_login(path, "whoami")
-
         self.name_in_session = request.session.get("name")
         self.object = self.get_object()
 
