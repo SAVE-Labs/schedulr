@@ -124,7 +124,7 @@
             const newField = document.createElement('div');
             newField.className = 'flex space-x-4 mt-2 mb-4';
             newField.innerHTML = `
-            <input type="text" name="schedule_datetime[]"
+            <input type="text" name="schedule_options[]"
                 class="datetime-picker block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 placeholder="YYYY-MM-DD">
         `;
@@ -132,7 +132,6 @@
 
             flatpickr(newField.querySelector('.datetime-picker'), {
                 enableTime: true,
-                time_24hr: localesUsing24Hour.includes(locale),
                 locale: locale || 'en',
             });
         }
