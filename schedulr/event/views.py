@@ -1,10 +1,10 @@
-from typing import Any
-
 from django.contrib.auth.views import redirect_to_login
 from django.forms import formset_factory
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import DetailView, TemplateView
+
+from schedulr.account.mixins import InitialSetupRequiredMixin
 
 from .forms import SelectOptionForm
 from .models import Event, Invitee, ScheduleOption, SelectedOption
@@ -32,7 +32,7 @@ class NameRequiredMixin:
         return handler(request, *args, **kwargs)
 
 
-class Homepage(TemplateView):
+class Homepage(InitialSetupRequiredMixin, TemplateView):
     template_name = "event/event_create.html"
 
     def post(self, request, *args, **kwargs):
