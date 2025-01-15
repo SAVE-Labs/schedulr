@@ -886,10 +886,6 @@ select {
   margin-left: -0.125rem;
 }
 
-.-mr-px {
-  margin-right: -1px;
-}
-
 .block {
   display: block;
 }
@@ -910,10 +906,6 @@ select {
   display: table;
 }
 
-.grid {
-  display: grid;
-}
-
 .hidden {
   display: none;
 }
@@ -926,11 +918,6 @@ select {
 .size-4 {
   width: 1rem;
   height: 1rem;
-}
-
-.size-5 {
-  width: 1.25rem;
-  height: 1.25rem;
 }
 
 .h-10 {
@@ -1013,10 +1000,6 @@ select {
   flex-shrink: 0;
 }
 
-.grow {
-  flex-grow: 1;
-}
-
 .origin-top-right {
   transform-origin: top right;
 }
@@ -1047,10 +1030,6 @@ select {
 
 .list-none {
   list-style-type: none;
-}
-
-.grid-cols-1 {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
 }
 
 .flex-col {
@@ -1090,6 +1069,11 @@ select {
        column-gap: 1.5rem;
 }
 
+.gap-x-8 {
+  -moz-column-gap: 2rem;
+       column-gap: 2rem;
+}
+
 .gap-x-1 {
   -moz-column-gap: 0.25rem;
        column-gap: 0.25rem;
@@ -1098,11 +1082,6 @@ select {
 .gap-x-1\.5 {
   -moz-column-gap: 0.375rem;
        column-gap: 0.375rem;
-}
-
-.gap-x-8 {
-  -moz-column-gap: 2rem;
-       column-gap: 2rem;
 }
 
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {
@@ -1138,10 +1117,6 @@ select {
 .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
   --tw-divide-opacity: 1;
   border-color: rgb(229 231 235 / var(--tw-divide-opacity));
-}
-
-.self-center {
-  align-self: center;
 }
 
 .overflow-x-auto {
@@ -1353,10 +1328,6 @@ select {
 
 .pt-4 {
   padding-top: 1rem;
-}
-
-.pl-10 {
-  padding-left: 2.5rem;
 }
 
 .text-left {
@@ -1673,10 +1644,6 @@ select {
   color: rgb(252 165 165 / var(--tw-text-opacity));
 }
 
-.focus-within\:relative:focus-within {
-  position: relative;
-}
-
 .focus-within\:ring-2:focus-within {
   --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
   --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
@@ -1817,17 +1784,12 @@ select {
     margin-right: auto;
   }
 
-  .sm\:size-4 {
-    width: 1rem;
-    height: 1rem;
+  .sm\:w-auto {
+    width: auto;
   }
 
   .sm\:w-full {
     width: 100%;
-  }
-
-  .sm\:w-auto {
-    width: auto;
   }
 
   .sm\:max-w-sm {
@@ -1868,10 +1830,6 @@ select {
   .sm\:px-6 {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
-  }
-
-  .sm\:pl-9 {
-    padding-left: 2.25rem;
   }
 
   .sm\:pl-6 {

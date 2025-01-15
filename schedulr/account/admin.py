@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
 from unfold.admin import ModelAdmin
 from unfold.forms import (AdminPasswordChangeForm, UserChangeForm,
                           UserCreationForm)
@@ -17,3 +18,6 @@ class UserAdmin(ModelAdmin):
 
     fieldsets = (
         (None, {'fields': ('email', 'password')}),)
+
+# Unregister the Group model from admin as it's not used
+admin.site.unregister(Group)
