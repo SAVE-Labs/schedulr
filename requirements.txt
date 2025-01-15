@@ -14,9 +14,9 @@ django==5.1.2 \
     # via
     #   -r requirements.in
     #   django-unfold
-django-unfold==0.40.0 \
-    --hash=sha256:5038463cedb8e8110774f738bab0b50fbe51b269d7e9a2d4c0b6478a9f9d9d91 \
-    --hash=sha256:84d2255d63d7cf4917f6cbe8a8caca2eed5d9175576a994d3d3f9b47381e19a0
+django-unfold==0.44.0 \
+    --hash=sha256:1a448c2ab993ab39811b5dede01f5b36066a2c7618b9db64c5f4b29aaa166b9c \
+    --hash=sha256:94da205caad9d5ba0d1a0542c2bacaadbf23d90bf176472214e53cecfc2e9469
     # via -r requirements.in
 environs==11.0.0 \
     --hash=sha256:069727a8f73d8ba8d033d3cd95c0da231d44f38f1da773bf076cef168d312ee8 \
