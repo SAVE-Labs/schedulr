@@ -26,10 +26,10 @@ DATA_DIR = BASE_DIR / "data"
 SECRET_KEY = "django-insecure-ntq^w&28ok&b=!+26w_kx5)lj$a06(ec=0a1)t9*3mado9gayt"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['schedulr.link', '127.0.0.1', 'localhost']
+CSRF_TRUSTED_ORIGINS = ['https://schedulr.link']
 
 # Application definition
 
