@@ -34,6 +34,9 @@ class ScheduleOption(models.Model):
 
         return context
 
+    def yes_count(self):
+        return self.selectedoption_set.filter(tentative=False).count()
+
 
 class Invitee(models.Model):
     name = models.CharField(max_length=255)
