@@ -16,7 +16,10 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     list_display = ("email", "is_staff", "is_active")
     ordering = ("email",)
 
-    fieldsets = ((None, {"fields": ("email", "password")}),)
+    fieldsets = (
+        (None, {"fields": ("email", "password")}),
+        ("Flags", {"fields": ("is_staff", "is_superuser", "is_active")}),
+    )
     add_fieldsets = (
         (
             None,
