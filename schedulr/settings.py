@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 
 from django.templatetags.static import static
+from environs import Env
+
+env = Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,13 +26,16 @@ DATA_DIR = BASE_DIR / "data"
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ntq^w&28ok&b=!+26w_kx5)lj$a06(ec=0a1)t9*3mado9gayt"
+SECRET_KEY = env.str(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-ntq^w&28ok&b=!+26w_kx5)lj$a06(ec=0a1)t9*3mado9gayt",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['schedulr.link', '127.0.0.1', 'localhost']
-CSRF_TRUSTED_ORIGINS = ['https://schedulr.link']
+ALLOWED_HOSTS = ["schedulr.link", "127.0.0.1", "localhost"]
+CSRF_TRUSTED_ORIGINS = ["https://schedulr.link", "http://127.0.0.1", "http://localhost"]
 
 # Application definition
 
@@ -78,6 +84,27 @@ TEMPLATES = [
 # FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 WSGI_APPLICATION = "schedulr.wsgi.application"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
 
 # TODO: Session expiry etc.
 

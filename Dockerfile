@@ -42,7 +42,6 @@ COPY . .
 FROM baseimage AS prod
 
 RUN SECRET_KEY=placeholder python manage.py collectstatic --no-input
-RUN SECRET_KEY=placeholder python manage.py compilemessages --no-input
 
 CMD [ "gunicorn", "securetransfer.wsgi", "--bind", "0.0.0.0:8000", "--timeout", "3600", "--workers", "6" ]
 
