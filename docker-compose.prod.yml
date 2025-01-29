@@ -11,5 +11,5 @@ services:
     env_file:
       - .env.prod
     volumes:
-      - /data:/usr/app/data
+      - ./data:/usr/app/data
     restart: always
