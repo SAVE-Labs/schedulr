@@ -31,11 +31,16 @@ SECRET_KEY = env.str(
     "django-insecure-ntq^w&28ok&b=!+26w_kx5)lj$a06(ec=0a1)t9*3mado9gayt",
 )
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = env.bool("DJANGO_DEBUG", False)
 
-ALLOWED_HOSTS = ["schedulr.link", "127.0.0.1", "localhost"]
-CSRF_TRUSTED_ORIGINS = ["https://schedulr.link", "http://127.0.0.1", "http://localhost"]
+ALLOWED_HOSTS = env.list(
+    "DJANGO_ALLOWED_HOSTS", ["schedulr.link", "127.0.0.1", "localhost"]
+)
+CSRF_TRUSTED_ORIGINS = env.list(
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    ["https://schedulr.link", "http://127.0.0.1", "http://localhost"],
+)
+
 
 # Application definition
 
@@ -81,7 +86,6 @@ TEMPLATES = [
         },
     },
 ]
-# FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 WSGI_APPLICATION = "schedulr.wsgi.application"
 
@@ -106,11 +110,11 @@ LOGGING = {
     },
 }
 
-# TODO: Session expiry etc.
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 200  # 200 days
+SESSION_SAVE_EVERY_REQUEST = True
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
