@@ -43,10 +43,10 @@ FROM baseimage AS prod
 
 RUN SECRET_KEY=placeholder python manage.py collectstatic --no-input
 
-CMD [ "gunicorn", "schedulr.wsgi", "--bind", "0.0.0.0:8000", "--timeout", "3600", "--workers", "6" ]
+CMD ["sh", "-c", "python manage.py migrate && gunicorn schedulr.wsgi --bind 0.0.0.0:8000 --timeout 3600 --workers 6"]
 
 FROM baseimage AS dev
 
 RUN pip install pip-tools
 
-CMD ["python", "manage.py", "runserver"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
