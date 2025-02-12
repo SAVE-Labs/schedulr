@@ -5,6 +5,7 @@
 
 # Docker
 docker-compose.yaml
+docker-compose.prod.yml
 Dockerfile
 .docker
 .dockerignore
@@ -19,3 +20,11 @@ staticfiles/
 
 # General
 README.md
+
+# Python
+.mypy_cache
+requirements.in
+
+# Dotfiles
+.env
+.env.example
