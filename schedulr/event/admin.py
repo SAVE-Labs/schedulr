@@ -11,6 +11,8 @@ class ScheduleOptionInline(admin.TabularInline):
 @admin.register(Event)
 class EventAdmin(ModelAdmin):
     inlines = [ScheduleOptionInline]
+    list_display = ['name', 'id']
+    ordering = ['name']
 
 
 @admin.register(Invitee)
