@@ -8,19 +8,19 @@ asgiref==3.8.1 \
     --hash=sha256:3e1e3ecc849832fe52ccf2cb6686b7a55f82bb1d6aee72a58826471390335e47 \
     --hash=sha256:c343bd80a0bec947a9860adb4c432ffa7db769836c64238fc34bdc3fec84d590
     # via django
-django==5.1.2 \
-    --hash=sha256:bd7376f90c99f96b643722eee676498706c9fd7dc759f55ebfaf2c08ebcdf4f0 \
-    --hash=sha256:f11aa87ad8d5617171e3f77e1d5d16f004b79a2cf5d2e1d2b97a6a1f8e9ba5ed
+django==5.2.8 \
+    --hash=sha256:23254866a5bb9a2cfa6004e8b809ec6246eba4b58a7589bc2772f1bcc8456c7f \
+    --hash=sha256:37e687f7bd73ddf043e2b6b97cfe02fcbb11f2dbb3adccc6a2b18c6daa054d7f
     # via
     #   -r requirements.in
     #   django-unfold
-django-unfold==0.44.0 \
-    --hash=sha256:1a448c2ab993ab39811b5dede01f5b36066a2c7618b9db64c5f4b29aaa166b9c \
-    --hash=sha256:94da205caad9d5ba0d1a0542c2bacaadbf23d90bf176472214e53cecfc2e9469
+django-unfold==0.71.0 \
+    --hash=sha256:76d4019aa9052ebe2e040d868be895d8581018fdf7debca943084aa0e79c2e31 \
+    --hash=sha256:995a296f1c15f172b0d8458ff12beb420ea7e9a666fa865a60ec03f70aaf4066
     # via -r requirements.in
-environs==11.0.0 \
-    --hash=sha256:069727a8f73d8ba8d033d3cd95c0da231d44f38f1da773bf076cef168d312ee8 \
-    --hash=sha256:e0bcfd41c718c07a7db422f9109e490746450da38793fe4ee197f397b9343435
+environs==14.5.0 \
+    --hash=sha256:1abd3e3a5721fb09797438d6c902bc2f35d4580dfaffe68b8ee588b67b504e13 \
+    --hash=sha256:f7b8f6fcf3301bc674bc9c03e39b5986d116126ffb96764efd34c339ed9464ee
     # via -r requirements.in
 gunicorn==23.0.0 \
     --hash=sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d \
@@ -44,10 +44,10 @@ sqlparse==0.4.4 \
     --hash=sha256:5430a4fe2ac7d0f93e66f1efc6e1338a41884b7ddf2a350cedd20ccc4d9d28f3 \
     --hash=sha256:d446183e84b8349fa3061f0fe7f06ca94ba65b426946ffebe6e3e8295332420c
     # via django
-whitenoise==6.7.0 \
-    --hash=sha256:58c7a6cd811e275a6c91af22e96e87da0b1109e9a53bb7464116ef4c963bf636 \
-    --hash=sha256:a1ae85e01fdc9815d12fa33f17765bc132ed2c54fa76daf9e39e879dd93566f6
+whitenoise==6.11.0 \
+    --hash=sha256:0f5bfce6061ae6611cd9396a8231e088722e4fc67bc13a111be74c738d99375f \
+    --hash=sha256:b2aeb45950597236f53b5342b3121c5de69c8da0109362aee506ce88e022d258
     # via -r requirements.in
-xkcdpass==1.19.9 \
-    --hash=sha256:a94f871bda870668e5c65eb84296e939600362df2cc036b91c5ca3815bd292d7
+xkcdpass==1.20.0 \
+    --hash=sha256:b5abfd7d2b59cdda59f937fb22210ac4649ad0d2e09e1f87bfe74a54e23ad18a
     # via -r requirements.in

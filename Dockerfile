@@ -18,7 +18,7 @@ RUN apt-get install -y --no-install-recommends \
     gettext \
     curl
 
-RUN curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.1/tailwindcss-linux-x64
+RUN curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.18/tailwindcss-linux-x64
 RUN chmod +x tailwindcss-linux-x64
 RUN mv tailwindcss-linux-x64 /usr/bin/tailwindcss
 
@@ -30,7 +30,8 @@ USER $USERNAME
 RUN python -m venv /usr/.venv
 ENV PATH="/usr/.venv/bin:$PATH"
 
-RUN pip install --upgrade pip
+# Compatibility issue with pip-tools and pip 25.3.
+RUN pip install "pip<25.2"
 
 COPY requirements.txt .
 RUN pip install --require-hashes --no-deps -r requirements.txt
