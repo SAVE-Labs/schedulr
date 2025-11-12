@@ -95,8 +95,8 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for form in formset %}
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                            <span class="{% if form.initial.option.yes_count %}font-bold{% endif %}">{{ form.initial.option.option }}</span>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="{% if form.initial.option.is_top_3 %}font-bold text-green-500{% else %}text-gray-700{% endif %}">{{ form.initial.option.option }}</span>
                             {{ form.option.as_hidden }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">

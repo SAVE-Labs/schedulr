@@ -39,6 +39,12 @@ class ScheduleOption(models.Model):
     def yes_count(self):
         return self.selectedoption_set.filter(tentative=False).count()
 
+    def is_top_3(self):
+        options = ScheduleOption.objects.filter(event=self.event)
+        sorted_options = sorted(options, key=lambda o: o.yes_count(), reverse=True)
+        top_3 = sorted_options[:3]
+        return self in top_3
+
 
 class Invitee(models.Model):
     name = models.CharField(max_length=255)
