@@ -26,13 +26,48 @@
             </div>
         </div>
 
+        <!-- Success Message -->
+        <div id="success-message" class="hidden mb-4 rounded-md bg-green-50 p-4" data-show-success="{% if request.method == 'POST' and not formset.total_error_count %}true{% else %}false{% endif %}">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-green-800">
+                        {% translate "Your preferences have been saved successfully!" %}
+                    </p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button type="button" onclick="document.getElementById('success-message').classList.add('hidden')" class="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100">
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
         {% if formset.total_error_count %}
-        <div class="text-red-600 mb-4">
-            {{ formset.errors }}
+        <div class="mb-4 rounded-md bg-red-50 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-red-800">
+                        {{ formset.errors }}
+                    </p>
+                </div>
+            </div>
         </div>
         {% endif %}
 
-        <form method="post" class="space-y-6">
+        <form method="post" class="space-y-6" id="voting-form">
             {% csrf_token %}
             {{ formset.management_form }}
 
@@ -110,9 +145,13 @@
             </table>
 
             <div>
-                <button type="submit"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    {% translate "Submit" %}
+                <button type="submit" id="submit-btn"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="submit-text">{% translate "Submit" %}</span>
+                    <svg id="submit-spinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
                 </button>
             </div>
         </form>
@@ -129,6 +168,29 @@ function copyToClipboard() {
 
 document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("event-link").value = window.location.href;
+
+    const form = document.getElementById('voting-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitText = document.getElementById('submit-text');
+    const submitSpinner = document.getElementById('submit-spinner');
+    const successMessage = document.getElementById('success-message');
+
+    // Check if we just submitted the form successfully (no errors and it's a POST)
+    const showSuccess = successMessage.getAttribute('data-show-success') === 'true';
+    if (showSuccess) {
+        successMessage.classList.remove('hidden');
+        // Auto-hide after 5 seconds
+        setTimeout(function() {
+            successMessage.classList.add('hidden');
+        }, 5000);
+    }
+
+    form.addEventListener('submit', function(e) {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitText.textContent = 'Saving...';
+        submitSpinner.classList.remove('hidden');
+    });
 });
 </script>
 {% endblock content %}
