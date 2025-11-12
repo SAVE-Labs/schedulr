@@ -12,7 +12,9 @@ class Event(models.Model):
     )
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
-    # TODO: Event creator?
+
+    def __str__(self):
+        return f"{self.name} ({self.id})"
 
 
 class ScheduleOption(models.Model):
