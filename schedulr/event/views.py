@@ -1,4 +1,5 @@
 from django.core.exceptions import PermissionDenied
+from django.db.models import Count
 from django.contrib.auth.views import redirect_to_login
 from django.forms import formset_factory
 from django.shortcuts import get_object_or_404, redirect, render
@@ -59,6 +60,8 @@ class Homepage(InitialSetupRequiredMixin, TemplateView):
             event.pk,
         ]
 
+        request.session["just_created"] = event.pk
+
         return redirect(reverse("event_detail", args=(event.pk,)))
 
     def get(self, request, *args, **kwargs):
@@ -71,7 +74,9 @@ class EventEdit(NameRequiredMixin, TemplateView):
     def _context(self, event):
         return {
             "event": event,
-            "options": event.scheduleoption_set.all().order_by("option"),
+            "options": event.scheduleoption_set.annotate(
+                answer_count=Count("selectedoption")
+            ).order_by("option"),
         }
 
     def get(self, request, *args, **kwargs):
@@ -115,6 +120,13 @@ class EventDetail(NameRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["can_edit"] = can_edit_event(self.request, self.object)
+        context["answered_names"] = list(
+            self.object.invitee_set.values_list("name", flat=True)
+        )
+        context["just_created"] = (
+            self.request.method == "GET"
+            and self.request.session.pop("just_created", None) == self.object.pk
+        )
         return context
 
     def _build_formset_data(self):
@@ -169,7 +181,7 @@ class EventDetail(NameRequiredMixin, DetailView):
             )
             for form in formset:
                 choice = form.cleaned_data["choice"]
-                if not choice:
+                if not choice or form.cleaned_data["option"].is_past():
                     continue
                 SelectedOption.objects.update_or_create(
                     option=form.cleaned_data["option"],

@@ -30,27 +30,32 @@
             <textarea id="description" name="description" rows="3" class="input">{{ event.description|default:'' }}</textarea>
         </div>
 
-        <div class="field" id="schedule-options">
+        <div class="field">
             <p class="field-label">{% translate "Dates" %}</p>
-            <p class="field-hint">{% translate "Pick a day and a start time for each option." %}</p>
+            <p class="field-hint">{% translate "Pick one or more days, set a start time, then add them." %}</p>
+            <div class="day-picker">
+                <input type="text" id="day-picker" aria-label="{% translate 'Days' %}" hidden>
+                <div class="day-picker-side">
+                    <label for="start-time" class="field-label">{% translate "Start time" %}</label>
+                    <input type="time" id="start-time" class="input">
+                    <button type="button" class="btn btn-secondary" id="add-days-btn" disabled>{% translate "Add date" %}</button>
+                </div>
+            </div>
+
             <div class="date-list" id="date-list">
                 {% for option in options %}
-                <div class="date-row">
+                <div class="date-row" data-answers="{{ option.answer_count }}">
                     <input type="hidden" name="option_ids[]" value="{{ option.pk }}">
                     <input type="text" name="schedule_options[]" value="{{ option.option|date:'Y-m-d H:i' }}"
-                        class="datetime-picker input" placeholder="{% translate 'Choose a date' %}" aria-label="{% translate 'Date' %}">
-                </div>
-                {% empty %}
-                <div class="date-row">
-                    <input type="hidden" name="option_ids[]" value="">
-                    <input type="text" name="schedule_options[]"
-                        class="datetime-picker input" placeholder="{% translate 'Choose a date' %}" aria-label="{% translate 'Date' %}">
+                        class="datetime-picker input" aria-label="{% translate 'Date' %}">
+                    <span class="date-answers">{% blocktranslate count counter=option.answer_count %}{{ counter }} answer{% plural %}{{ counter }} answers{% endblocktranslate %}</span>
                 </div>
                 {% endfor %}
             </div>
-            <button type="button" class="btn btn-quiet" onclick="addDateField()" style="margin-top: 0.75rem;">
-                {% translate "Add a date" %}
-            </button>
+            <p class="field-hint" id="no-dates" {% if options %}hidden{% endif %}>{% translate "No dates added yet." %}</p>
+            {% if event %}
+            <p class="field-hint" style="margin-top: 0.75rem;">{% translate "Changing the time of a date keeps the answers already given." %}</p>
+            {% endif %}
         </div>
 
         <div class="actions">
@@ -69,12 +74,18 @@
 </div>
 
 <link rel="stylesheet" href="{% static 'flatpicker/flatpickr.min.css' %}">
+<link rel="stylesheet" href="{% static 'flatpicker/themes/dark.css' %}" media="(prefers-color-scheme: dark)">
 <script src="{% static 'flatpicker/flatpickr.min.js' %}"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const userLang = navigator.language || navigator.userLanguage;
         const locale = userLang.split('-')[0];
+        const dateList = document.getElementById('date-list');
+        const noDates = document.getElementById('no-dates');
+        const startTime = document.getElementById('start-time');
+        const addDaysBtn = document.getElementById('add-days-btn');
+        let dayPicker;
 
         function loadLocaleScript(locale, callback) {
             const script = document.createElement('script');
@@ -94,7 +105,11 @@
             document.head.appendChild(script);
         }
 
-        function addRemoveButton(field) {
+        function updateEmptyState() {
+            noDates.hidden = dateList.children.length > 0;
+        }
+
+        function addRemoveButton(row) {
             const removeButton = document.createElement('button');
             removeButton.type = 'button';
             removeButton.className = 'btn btn-icon';
@@ -105,54 +120,90 @@
                 </svg>
             `;
             removeButton.onclick = function() {
-                field.closest('.date-row').remove();
+                const answers = parseInt(row.dataset.answers || '0', 10);
+                if (answers > 0) {
+                    const question = answers === 1
+                        ? '{% translate "1 person answered for this date. Removing the date also removes their answer." %}'
+                        : '{% translate "%s people answered for this date. Removing the date also removes their answers." %}'.replace('%s', answers);
+                    if (!window.confirm(question)) {
+                        return;
+                    }
+                }
+                row.remove();
+                updateEmptyState();
             };
-            field.closest('.date-row').appendChild(removeButton);
+            row.appendChild(removeButton);
         }
 
-        function initializeFlatpickr() {
-            document.querySelectorAll('.datetime-picker').forEach(field => {
-                flatpickr(field, {
-                    enableTime: true,
-                    time_24hr: true,
-                    locale: locale || 'en',
-                });
-                addRemoveButton(field);
+        function initializeRow(row) {
+            flatpickr(row.querySelector('.datetime-picker'), {
+                enableTime: true,
+                time_24hr: true,
+                locale: locale || 'en',
             });
+            addRemoveButton(row);
         }
 
-        loadLocaleScript(locale, initializeFlatpickr);
-
-        function addDateField() {
-            const dateList = document.getElementById('date-list');
-            const newField = document.createElement('div');
-            newField.className = 'date-row';
+        function addRow(value) {
+            const exists = Array.from(dateList.querySelectorAll('.datetime-picker')).some(field => field.value === value);
+            if (exists) {
+                return;
+            }
+            const row = document.createElement('div');
+            row.className = 'date-row';
             const newId = document.createElement('input');
             newId.type = 'hidden';
             newId.name = 'option_ids[]';
-            newField.appendChild(newId);
+            row.appendChild(newId);
             const newInput = document.createElement('input');
             newInput.type = 'text';
             newInput.name = 'schedule_options[]';
             newInput.className = 'datetime-picker input';
-            newInput.placeholder = '{% translate "Choose a date" %}';
             newInput.setAttribute('aria-label', '{% translate "Date" %}');
-            newField.appendChild(newInput);
-            dateList.appendChild(newField);
-
-            addRemoveButton(newInput);
-
-            flatpickr(newInput, {
-                enableTime: true,
-                time_24hr: true,
-                locale: locale || 'en',
-                onReady: function(selectedDates, dateStr, instance) {
-                    instance.open();
-                }
-            });
+            newInput.value = value;
+            row.appendChild(newInput);
+            dateList.appendChild(row);
+            initializeRow(row);
         }
 
-        window.addDateField = addDateField;
+        function sortRows() {
+            Array.from(dateList.children)
+                .sort((a, b) => a.querySelector('.datetime-picker').value.localeCompare(b.querySelector('.datetime-picker').value))
+                .forEach(row => dateList.appendChild(row));
+        }
+
+        function updateAddButton() {
+            const count = dayPicker ? dayPicker.selectedDates.length : 0;
+            addDaysBtn.disabled = count === 0 || !startTime.value;
+            addDaysBtn.textContent = count > 1
+                ? '{% translate "Add %s dates" %}'.replace('%s', count)
+                : '{% translate "Add date" %}';
+        }
+
+        function addSelectedDays() {
+            dayPicker.selectedDates
+                .map(day => dayPicker.formatDate(day, 'Y-m-d') + ' ' + startTime.value)
+                .forEach(addRow);
+            sortRows();
+            dayPicker.clear();
+            updateEmptyState();
+            updateAddButton();
+        }
+
+        loadLocaleScript(locale, function() {
+            dateList.querySelectorAll('.date-row').forEach(initializeRow);
+            dayPicker = flatpickr('#day-picker', {
+                inline: true,
+                mode: 'multiple',
+                dateFormat: 'Y-m-d',
+                minDate: 'today',
+                locale: locale || 'en',
+                onChange: updateAddButton,
+            });
+        });
+
+        startTime.addEventListener('input', updateAddButton);
+        addDaysBtn.addEventListener('click', addSelectedDays);
 
         const form = document.getElementById('event-create-form');
         const submitBtn = document.getElementById('create-submit-btn');
@@ -161,20 +212,22 @@
 
         form.addEventListener('submit', function(event) {
             const nameField = document.getElementById('name');
-            const dateFields = document.querySelectorAll('.datetime-picker');
+            const pendingDays = dayPicker ? dayPicker.selectedDates.length : 0;
             let message = '';
 
+            if (pendingDays && startTime.value) {
+                addSelectedDays();
+            }
+
             nameField.classList.toggle('is-invalid', !nameField.value.trim());
-            dateFields.forEach(field => {
-                field.classList.toggle('is-invalid', !field.value);
-            });
+            startTime.classList.toggle('is-invalid', pendingDays > 0 && !startTime.value);
 
             if (!nameField.value.trim()) {
                 message = '{% translate "Give the event a name." %}';
-            } else if (!dateFields.length) {
-                message = '{% translate "Add at least one date." %}';
-            } else if (form.querySelector('.datetime-picker.is-invalid')) {
-                message = '{% translate "Pick a date for each option, or remove the empty ones." %}';
+            } else if (pendingDays && !startTime.value) {
+                message = '{% translate "Set a start time for the days you picked." %}';
+            } else if (!dateList.children.length) {
+                message = '{% translate "Pick at least one day in the calendar and add it." %}';
             }
 
             if (message) {

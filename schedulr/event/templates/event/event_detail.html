@@ -14,10 +14,16 @@
 <p class="lede">{{ object.description }}</p>
 {% endif %}
 
-<div class="share">
-    <label for="event-link" class="sr-only">{% translate "Link to this event" %}</label>
-    <input type="text" id="event-link" class="share-url" value="" readonly>
-    <button type="button" class="btn btn-secondary" id="copy-btn" onclick="copyToClipboard()">{% translate "Copy link" %}</button>
+<div class="{% if just_created %}share-intro{% endif %}">
+    {% if just_created %}
+    <h2 class="join-label">{% translate "Your event is ready" %}</h2>
+    <p class="field-hint">{% translate "Send this link to everyone you want to invite. Anyone with the link can answer." %}</p>
+    {% endif %}
+    <div class="share">
+        <label for="event-link" class="sr-only">{% translate "Link to this event" %}</label>
+        <input type="text" id="event-link" class="share-url" value="" readonly>
+        <button type="button" class="btn {% if just_created %}btn-primary{% else %}btn-secondary{% endif %}" id="share-btn">{% translate "Copy link" %}</button>
+    </div>
 </div>
 
 {% with total=object.invitee_set.count %}
@@ -31,6 +37,8 @@
         <input type="text" name="name" id="name" class="input" required autocomplete="given-name" placeholder="{% translate 'Your name' %}">
         <button type="submit" class="btn btn-primary">{% translate "Start answering" %}</button>
     </div>
+    <p class="field-hint" id="name-taken" role="status" style="margin: 0.75rem 0 0;" hidden></p>
+    {{ answered_names|json_script:"answered-names" }}
 </form>
 {% endif %}
 
@@ -65,13 +73,14 @@
         {% with option=form.initial.option %}
         {% with ctx=option.selected_context %}
         {% with yes=ctx.yes|length maybe=ctx.tentative|length %}
-        <div class="option{% if yes and option.is_top_3 %} is-best{% endif %}">
+        {% with past=option.is_past %}
+        <div class="option{% if past %} is-past{% elif yes and option.is_top_3 %} is-best{% endif %}">
             {{ form.option.as_hidden }}
             <div id="summary-{{ form.prefix }}">
                 <h2 class="option-when">
                     {{ option.option|date:"D j M" }}
                     <span class="option-time">{{ option.option|date:"H:i" }}</span>
-                    {% if yes and option.is_top_3 %}<span class="best-note">{% translate "Top pick" %}</span>{% endif %}
+                    {% if past %}<span class="past-note">{% translate "This date has passed" %}</span>{% elif yes and option.is_top_3 %}<span class="best-note">{% translate "Top pick" %}</span>{% endif %}
                 </h2>
                 {% if total %}
                 <div class="tally" aria-hidden="true">
@@ -87,7 +96,7 @@
                 </p>
             </div>
             <div class="answer">
-                <fieldset class="choice" {% if not request.session.name %}disabled{% endif %}>
+                <fieldset class="choice" {% if not request.session.name or past %}disabled{% endif %}>
                     <legend class="sr-only">{% blocktranslate with when=option.option|date:"l j F H:i" %}Can you make it on {{ when }}?{% endblocktranslate %}</legend>
                     <input type="radio" id="{{ form.prefix }}-yes" name="{{ form.choice.html_name }}" value="yes" {% if form.choice.value == "yes" %}checked{% endif %}>
                     <label for="{{ form.prefix }}-yes">{% translate "Yes" %}</label>
@@ -99,6 +108,7 @@
                 <span class="save-state" id="state-{{ form.prefix }}" role="status"></span>
             </div>
         </div>
+        {% endwith %}
         {% endwith %}
         {% endwith %}
         {% endwith %}
@@ -124,20 +134,49 @@
 {% endwith %}
 
 <script>
-function copyToClipboard() {
-    const copyText = document.getElementById("event-link");
-    const copyBtn = document.getElementById("copy-btn");
-    copyText.select();
-    copyText.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    copyBtn.textContent = "{% translate 'Copied' %}";
-    setTimeout(function() {
-        copyBtn.textContent = "{% translate 'Copy link' %}";
-    }, 2000);
-}
-
 document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById("event-link").value = window.location.href;
+    const eventUrl = window.location.origin + window.location.pathname;
+    const linkField = document.getElementById("event-link");
+    const shareBtn = document.getElementById("share-btn");
+    const useShareSheet = navigator.share && window.matchMedia("(pointer: coarse)").matches;
+    linkField.value = eventUrl;
+    if (useShareSheet) {
+        shareBtn.textContent = "{% translate 'Share link' %}";
+    }
+
+    function copyLink() {
+        const copied = navigator.clipboard
+            ? navigator.clipboard.writeText(eventUrl)
+            : Promise.reject();
+        copied.catch(function() {
+            linkField.select();
+            document.execCommand("copy");
+        }).finally(function() {
+            shareBtn.textContent = "{% translate 'Copied' %}";
+            setTimeout(function() {
+                shareBtn.textContent = "{% translate 'Copy link' %}";
+            }, 2000);
+        });
+    }
+
+    const joinName = document.getElementById("name");
+    if (joinName) {
+        const answeredNames = JSON.parse(document.getElementById("answered-names").textContent);
+        const nameTaken = document.getElementById("name-taken");
+        joinName.addEventListener("input", function() {
+            const typed = joinName.value.trim();
+            nameTaken.hidden = !answeredNames.includes(typed.toLowerCase());
+            nameTaken.textContent = "{% translate 'Someone called %s has already answered. If that is you, you can change your answers. If not, add your last name.' %}".replace("%s", typed);
+        });
+    }
+
+    shareBtn.addEventListener("click", function() {
+        if (useShareSheet) {
+            navigator.share({ title: "{{ object.name|escapejs }}", url: eventUrl }).catch(function() {});
+        } else {
+            copyLink();
+        }
+    });
 
     const form = document.getElementById('voting-form');
     let queue = Promise.resolve();

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from .utils import generate_unique_id
 
@@ -38,6 +39,9 @@ class ScheduleOption(models.Model):
                 context["yes"].append(invitee_name)
 
         return context
+
+    def is_past(self):
+        return self.option.date() < timezone.now().date()
 
     def yes_count(self):
         return self.selectedoption_set.filter(tentative=False, declined=False).count()
