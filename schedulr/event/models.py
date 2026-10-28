@@ -26,10 +26,13 @@ class ScheduleOption(models.Model):
         context = {
             "yes": [],
             "tentative": [],
+            "no": [],
         }
         for selected in selected_by:
             invitee_name = selected.invitee.name
-            if selected.tentative:
+            if selected.declined:
+                context["no"].append(invitee_name)
+            elif selected.tentative:
                 context["tentative"].append(invitee_name)
             else:
                 context["yes"].append(invitee_name)
@@ -37,7 +40,7 @@ class ScheduleOption(models.Model):
         return context
 
     def yes_count(self):
-        return self.selectedoption_set.filter(tentative=False).count()
+        return self.selectedoption_set.filter(tentative=False, declined=False).count()
 
     def is_top_3(self):
         options = ScheduleOption.objects.filter(event=self.event)
@@ -55,3 +58,4 @@ class SelectedOption(models.Model):
     option = models.ForeignKey(ScheduleOption, on_delete=models.CASCADE)
     invitee = models.ForeignKey(Invitee, on_delete=models.CASCADE)
     tentative = models.BooleanField(default=False)
+    declined = models.BooleanField(default=False)

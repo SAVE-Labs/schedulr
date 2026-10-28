@@ -12,6 +12,8 @@ from .models import Event, Invitee, ScheduleOption, SelectedOption
 
 
 class NameRequiredMixin:
+    name_required_methods = ("get", "post")
+
     def dispatch(self, request, *args, **kwargs):
         # Try to dispatch to the right method; if a method doesn't exist,
         # defer to the error handler. Also defer to the error handler if the
@@ -26,7 +28,8 @@ class NameRequiredMixin:
         if handler == self.http_method_not_allowed:
             return handler
 
-        if not request.session.get("name"):
+        name = request.session.get("name")
+        if request.method.lower() in self.name_required_methods and not name:
             path = request.get_full_path()
             return redirect_to_login(path, "whoami")
 
@@ -107,6 +110,7 @@ class EventEdit(NameRequiredMixin, TemplateView):
 class EventDetail(NameRequiredMixin, DetailView):
     template_name = "event/event_detail.html"
     queryset = Event.objects.all()
+    name_required_methods = ("post",)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -123,9 +127,12 @@ class EventDetail(NameRequiredMixin, DetailView):
                 invitee__name=self.name_in_session
             ).first()
             if selected_option:
-                option_data["choice"] = (
-                    "tentative" if selected_option.tentative else "yes"
-                )
+                if selected_option.declined:
+                    option_data["choice"] = "no"
+                elif selected_option.tentative:
+                    option_data["choice"] = "tentative"
+                else:
+                    option_data["choice"] = "yes"
             form_data.append(option_data)
 
         return form_data
@@ -161,18 +168,16 @@ class EventDetail(NameRequiredMixin, DetailView):
                 name=self.name_in_session, event=self.object
             )
             for form in formset:
-                if form.cleaned_data["choice"] != "no":
-                    SelectedOption.objects.update_or_create(
-                        option=form.cleaned_data["option"],
-                        invitee=invitee,
-                        defaults={
-                            "tentative": form.cleaned_data["choice"] == "tentative",
-                        },
-                    )
-                else:
-                    SelectedOption.objects.filter(
-                        option=form.cleaned_data["option"],
-                        invitee=invitee,
-                    ).delete()
+                choice = form.cleaned_data["choice"]
+                if not choice:
+                    continue
+                SelectedOption.objects.update_or_create(
+                    option=form.cleaned_data["option"],
+                    invitee=invitee,
+                    defaults={
+                        "tentative": choice == "tentative",
+                        "declined": choice == "no",
+                    },
+                )
 
         return self.render_to_response(context)

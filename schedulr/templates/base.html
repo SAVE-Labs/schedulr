@@ -1,13 +1,17 @@
 {% load static i18n %}
-<html class="h-full bg-gray-100">
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
 
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}schedulr{% endblock title %}</title>
+    <link rel="preload" href="{% static 'fonts/bricolage-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{% static 'main.css' %}">
     <link rel="icon" href="{% static 'favicon.webp' %}">
 </head>
 
-<body class="h-full">
+<body>
     {% block body %}
     {% endblock body %}
 </body>

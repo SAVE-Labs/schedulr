@@ -10,7 +10,7 @@ class SelectOptionForm(forms.ModelForm):
             ("tentative", "Tentative"),
             ("no", "No"),
         ],
-        initial="no",
+        required=False,
     )
 
     class Meta:

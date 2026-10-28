@@ -1,119 +1,75 @@
 {% extends "page.html" %}
 {% load i18n static %}
 
-{% block content %}
-<div class="flex items-center justify-center">
-    <div class="w-full max-w-4xl p-8 bg-white shadow-2xl rounded-xl">
-        <h2 class="text-3xl font-semibold text-center text-gray-800 mb-8">
-            {% if event %}{% blocktrans %}Edit Event{% endblocktrans %}{% else %}{% blocktrans %}Create a New Event{% endblocktrans %}{% endif %}
-        </h2>
+{% block title %}{% if event %}{% translate "Edit event" %}{% else %}{% translate "New event" %}{% endif %} | schedulr{% endblock title %}
 
-        <!-- Validation Error Message -->
-        <div id="validation-error" class="hidden mb-4 rounded-md bg-red-50 p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-red-800" id="validation-error-text"></p>
-                </div>
-                <div class="ml-auto pl-3">
-                    <button type="button" onclick="document.getElementById('validation-error').classList.add('hidden')" class="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100">
-                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
+{% block content %}
+<div class="page-narrow">
+    <h1 class="title">
+        {% if event %}{% translate "Edit event" %}{% else %}{% translate "Find a date that works" %}{% endif %}
+    </h1>
+    {% if not event %}
+    <p class="lede">{% translate "Add the dates you have in mind, then share the link. Everyone marks which dates they can make." %}</p>
+    {% endif %}
+
+    <form class="stack" method="POST" action="" id="event-create-form" style="margin-top: 2.5rem;" novalidate>
+        {% csrf_token %}
+
+        <div id="validation-error" class="notice notice-error" role="alert" hidden>
+            <p id="validation-error-text"></p>
+            <button type="button" class="notice-close" aria-label="{% translate 'Dismiss' %}" onclick="this.parentNode.hidden = true">&times;</button>
         </div>
 
-        <form class="space-y-6" method="POST" action="" id="event-create-form">
-            {% csrf_token %}
+        <div class="field">
+            <label for="name">{% translate "Event name" %}</label>
+            <input type="text" id="name" name="name" required class="input" value="{{ event.name|default:'' }}">
+        </div>
 
-            <!-- Event Name -->
-            <div>
-                <label for="name" class="block text-sm font-medium text-gray-700">
-                    {% blocktrans %}Event Name{% endblocktrans %}
-                </label>
-                <div class="mt-2">
-                    <input type="text" id="name" name="name" required value="{{ event.name|default:'' }}"
-                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
-            </div>
+        <div class="field">
+            <label for="description">{% translate "Description" %}</label>
+            <textarea id="description" name="description" rows="3" class="input">{{ event.description|default:'' }}</textarea>
+        </div>
 
-            <!-- Description -->
-            <div>
-                <label for="description" class="block text-sm font-medium text-gray-700">
-                    {% blocktrans %}Description{% endblocktrans %}
-                </label>
-                <div class="mt-2">
-                    <textarea id="description" name="description" rows="4"
-                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">{{ event.description|default:'' }}</textarea>
-                </div>
-            </div>
-
-            <!-- Schedule Options -->
-            <div id="schedule-options" class="space-y-4">
-                <label class="block text-sm font-medium text-gray-700 mt-4">
-                    {% blocktrans %}Schedule Options{% endblocktrans %}
-                </label>
+        <div class="field" id="schedule-options">
+            <p class="field-label">{% translate "Dates" %}</p>
+            <p class="field-hint">{% translate "Pick a day and a start time for each option." %}</p>
+            <div class="date-list" id="date-list">
                 {% for option in options %}
-                <div class="flex space-x-4 mt-2 mb-4">
+                <div class="date-row">
                     <input type="hidden" name="option_ids[]" value="{{ option.pk }}">
                     <input type="text" name="schedule_options[]" value="{{ option.option|date:'Y-m-d H:i' }}"
-                        class="datetime-picker block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        placeholder="YYYY-MM-DD">
+                        class="datetime-picker input" placeholder="{% translate 'Choose a date' %}" aria-label="{% translate 'Date' %}">
                 </div>
                 {% empty %}
-                <div class="flex space-x-4 mt-2 mb-4">
+                <div class="date-row">
                     <input type="hidden" name="option_ids[]" value="">
                     <input type="text" name="schedule_options[]"
-                        class="datetime-picker block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        placeholder="YYYY-MM-DD">
+                        class="datetime-picker input" placeholder="{% translate 'Choose a date' %}" aria-label="{% translate 'Date' %}">
                 </div>
                 {% endfor %}
-                <button type="button" onclick="addDateField()"
-                    class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
-                    {% blocktrans %}+ Add Another Date{% endblocktrans %}
-                </button>
             </div>
+            <button type="button" class="btn btn-quiet" onclick="addDateField()" style="margin-top: 0.75rem;">
+                {% translate "Add a date" %}
+            </button>
+        </div>
 
-            <!-- Submit Button -->
-            <div>
-                <button type="submit" id="create-submit-btn"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <span id="create-submit-text">{% blocktrans %}Submit{% endblocktrans %}</span>
-                    <svg id="create-submit-spinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </button>
-            </div>
-        </form>
-    </div>
+        <div class="actions">
+            <button type="submit" id="create-submit-btn" class="btn btn-primary">
+                <span id="create-submit-text">{% if event %}{% translate "Save changes" %}{% else %}{% translate "Create event" %}{% endif %}</span>
+                <svg id="create-submit-spinner" class="spinner" hidden xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity="0.3" stroke-width="3"></circle>
+                    <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+                </svg>
+            </button>
+            {% if event %}
+            <a href="{% url 'event_detail' event.pk %}" class="text-link">{% translate "Back to the event" %}</a>
+            {% endif %}
+        </div>
+    </form>
 </div>
 
 <link rel="stylesheet" href="{% static 'flatpicker/flatpickr.min.css' %}">
 <script src="{% static 'flatpicker/flatpickr.min.js' %}"></script>
-
-<style>
-    .flatpickr-day.selected,
-    .flatpickr-day.startRange,
-    .flatpickr-day.endRange,
-    .flatpickr-day.selected:hover,
-    .flatpickr-day.startRange:hover,
-    .flatpickr-day.endRange:hover {
-        background-color: #6366f1;
-        border-color: #6366f1;
-        color: white;
-    }
-
-    .flatpickr-day.today {
-        border-color: #6366f1;
-    }
-</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -141,22 +97,24 @@
         function addRemoveButton(field) {
             const removeButton = document.createElement('button');
             removeButton.type = 'button';
-            removeButton.className = 'remove-date-btn ml-2 text-gray-500';
+            removeButton.className = 'btn btn-icon';
+            removeButton.setAttribute('aria-label', '{% translate "Remove this date" %}');
             removeButton.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
             `;
             removeButton.onclick = function() {
-                field.parentNode.remove();
+                field.closest('.date-row').remove();
             };
-            field.parentNode.appendChild(removeButton);
+            field.closest('.date-row').appendChild(removeButton);
         }
 
         function initializeFlatpickr() {
             document.querySelectorAll('.datetime-picker').forEach(field => {
                 flatpickr(field, {
                     enableTime: true,
+                    time_24hr: true,
                     locale: locale || 'en',
                 });
                 addRemoveButton(field);
@@ -166,9 +124,9 @@
         loadLocaleScript(locale, initializeFlatpickr);
 
         function addDateField() {
-            const scheduleOptions = document.getElementById('schedule-options');
+            const dateList = document.getElementById('date-list');
             const newField = document.createElement('div');
-            newField.className = 'flex space-x-4 mt-2 mb-4';
+            newField.className = 'date-row';
             const newId = document.createElement('input');
             newId.type = 'hidden';
             newId.name = 'option_ids[]';
@@ -176,17 +134,17 @@
             const newInput = document.createElement('input');
             newInput.type = 'text';
             newInput.name = 'schedule_options[]';
-            newInput.className = 'datetime-picker block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm';
-            newInput.placeholder = 'YYYY-MM-DD';
+            newInput.className = 'datetime-picker input';
+            newInput.placeholder = '{% translate "Choose a date" %}';
+            newInput.setAttribute('aria-label', '{% translate "Date" %}');
             newField.appendChild(newInput);
+            dateList.appendChild(newField);
 
             addRemoveButton(newInput);
 
-            scheduleOptions.insertBefore(newField, scheduleOptions.lastElementChild);
-
-            // Initialize flatpickr for the new input field and open it
             flatpickr(newInput, {
                 enableTime: true,
+                time_24hr: true,
                 locale: locale || 'en',
                 onReady: function(selectedDates, dateStr, instance) {
                     instance.open();
@@ -198,42 +156,39 @@
 
         const form = document.getElementById('event-create-form');
         const submitBtn = document.getElementById('create-submit-btn');
-        const submitText = document.getElementById('create-submit-text');
-        const submitSpinner = document.getElementById('create-submit-spinner');
         const validationError = document.getElementById('validation-error');
         const validationErrorText = document.getElementById('validation-error-text');
 
         form.addEventListener('submit', function(event) {
+            const nameField = document.getElementById('name');
             const dateFields = document.querySelectorAll('.datetime-picker');
-            let valid = true;
-            let emptyCount = 0;
+            let message = '';
 
+            nameField.classList.toggle('is-invalid', !nameField.value.trim());
             dateFields.forEach(field => {
-                if (!field.value) {
-                    valid = false;
-                    emptyCount++;
-                    field.classList.add('border-red-500');
-                } else {
-                    field.classList.remove('border-red-500');
-                }
+                field.classList.toggle('is-invalid', !field.value);
             });
 
-            if (!valid) {
+            if (!nameField.value.trim()) {
+                message = '{% translate "Give the event a name." %}';
+            } else if (!dateFields.length) {
+                message = '{% translate "Add at least one date." %}';
+            } else if (form.querySelector('.datetime-picker.is-invalid')) {
+                message = '{% translate "Pick a date for each option, or remove the empty ones." %}';
+            }
+
+            if (message) {
                 event.preventDefault();
-                validationErrorText.textContent = 'Please fill in all date fields.';
-                validationError.classList.remove('hidden');
-                // Scroll to error message
+                validationErrorText.textContent = message;
+                validationError.hidden = false;
                 validationError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
 
-            // Hide validation error if shown
-            validationError.classList.add('hidden');
-
-            // Show loading state
+            validationError.hidden = true;
             submitBtn.disabled = true;
-            submitText.textContent = '{% if event %}{% translate "Saving..." %}{% else %}{% translate "Creating..." %}{% endif %}';
-            submitSpinner.classList.remove('hidden');
+            document.getElementById('create-submit-text').textContent = '{% if event %}{% translate "Saving..." %}{% else %}{% translate "Creating..." %}{% endif %}';
+            document.getElementById('create-submit-spinner').hidden = false;
         });
     });
 </script>
