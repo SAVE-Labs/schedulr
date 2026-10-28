@@ -1,6 +1,6 @@
 from django.contrib.auth.views import redirect_to_login
 from django.forms import formset_factory
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.generic import DetailView, TemplateView
 
@@ -49,6 +49,44 @@ class Homepage(InitialSetupRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
+
+
+class EventEdit(NameRequiredMixin, TemplateView):
+    template_name = "event/event_create.html"
+
+    def _context(self, event):
+        return {
+            "event": event,
+            "options": event.scheduleoption_set.all().order_by("option"),
+        }
+
+    def get(self, request, *args, **kwargs):
+        event = get_object_or_404(Event, pk=kwargs["pk"])
+        return render(request, self.template_name, self._context(event))
+
+    def post(self, request, *args, **kwargs):
+        event = get_object_or_404(Event, pk=kwargs["pk"])
+        event.name = request.POST.get("name")
+        event.description = request.POST.get("description")
+        event.save()
+
+        option_ids = request.POST.getlist("option_ids[]")
+        schedule_options = request.POST.getlist("schedule_options[]")
+
+        # Existing options are updated in place so their votes are kept,
+        # options that were removed from the form are deleted.
+        kept = []
+        for option_id, value in zip(option_ids, schedule_options):
+            if option_id:
+                option = get_object_or_404(ScheduleOption, pk=option_id, event=event)
+                option.option = value
+                option.save()
+            else:
+                option = ScheduleOption.objects.create(event=event, option=value)
+            kept.append(option.pk)
+        event.scheduleoption_set.exclude(pk__in=kept).delete()
+
+        return redirect(reverse("event_detail", args=(event.pk,)))
 
 
 class EventDetail(NameRequiredMixin, DetailView):

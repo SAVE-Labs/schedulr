@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path
 
 from schedulr.account.views import InitialSetupView, SessionSetupView
-from schedulr.event.views import EventDetail, Homepage
+from schedulr.event.views import EventDetail, EventEdit, Homepage
 
 urlpatterns = [
     path("", Homepage.as_view(), name="homepage"),
@@ -35,4 +35,5 @@ urlpatterns = [
     ),
     path("admin/", admin.site.urls),
     path("event/<str:pk>", EventDetail.as_view(), name="event_detail"),
+    path("event/<str:pk>/edit", EventEdit.as_view(), name="event_edit"),
 ]

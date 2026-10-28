@@ -20,7 +20,7 @@
                     </label>
                     <input type="text" name="name" id="name"
                         class="block w-full border-0 p-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm/6"
-                        placeholder="Jane Smith">
+                        placeholder="Jane Smith" value="{{ request.session.name|default:'' }}">
                 </div>
 
                 <div class="mt-6 flex items-center justify-end gap-x-6">

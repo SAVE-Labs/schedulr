@@ -5,7 +5,7 @@
 <div class="flex items-center justify-center">
     <div class="w-full max-w-4xl p-8 bg-white shadow-2xl rounded-xl">
         <h2 class="text-3xl font-semibold text-center text-gray-800 mb-8">
-            {% blocktrans %}Create a New Event{% endblocktrans %}
+            {% if event %}{% blocktrans %}Edit Event{% endblocktrans %}{% else %}{% blocktrans %}Create a New Event{% endblocktrans %}{% endif %}
         </h2>
 
         <!-- Validation Error Message -->
@@ -38,7 +38,7 @@
                     {% blocktrans %}Event Name{% endblocktrans %}
                 </label>
                 <div class="mt-2">
-                    <input type="text" id="name" name="name" required
+                    <input type="text" id="name" name="name" required value="{{ event.name|default:'' }}"
                         class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
             </div>
@@ -50,7 +50,7 @@
                 </label>
                 <div class="mt-2">
                     <textarea id="description" name="description" rows="4"
-                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">{{ event.description|default:'' }}</textarea>
                 </div>
             </div>
 
@@ -59,11 +59,21 @@
                 <label class="block text-sm font-medium text-gray-700 mt-4">
                     {% blocktrans %}Schedule Options{% endblocktrans %}
                 </label>
+                {% for option in options %}
                 <div class="flex space-x-4 mt-2 mb-4">
-                    <input type="text" id="initial-datetime-picker" name="schedule_options[]"
+                    <input type="hidden" name="option_ids[]" value="{{ option.pk }}">
+                    <input type="text" name="schedule_options[]" value="{{ option.option|date:'Y-m-d H:i' }}"
                         class="datetime-picker block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         placeholder="YYYY-MM-DD">
                 </div>
+                {% empty %}
+                <div class="flex space-x-4 mt-2 mb-4">
+                    <input type="hidden" name="option_ids[]" value="">
+                    <input type="text" name="schedule_options[]"
+                        class="datetime-picker block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="YYYY-MM-DD">
+                </div>
+                {% endfor %}
                 <button type="button" onclick="addDateField()"
                     class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
                     {% blocktrans %}+ Add Another Date{% endblocktrans %}
@@ -144,12 +154,6 @@
         }
 
         function initializeFlatpickr() {
-            const initialPicker = document.getElementById('initial-datetime-picker');
-            flatpickr(initialPicker, {
-                enableTime: true,
-                locale: locale || 'en',
-            });
-
             document.querySelectorAll('.datetime-picker').forEach(field => {
                 flatpickr(field, {
                     enableTime: true,
@@ -165,6 +169,10 @@
             const scheduleOptions = document.getElementById('schedule-options');
             const newField = document.createElement('div');
             newField.className = 'flex space-x-4 mt-2 mb-4';
+            const newId = document.createElement('input');
+            newId.type = 'hidden';
+            newId.name = 'option_ids[]';
+            newField.appendChild(newId);
             const newInput = document.createElement('input');
             newInput.type = 'text';
             newInput.name = 'schedule_options[]';
@@ -224,7 +232,7 @@
 
             // Show loading state
             submitBtn.disabled = true;
-            submitText.textContent = '{% translate "Creating..." %}';
+            submitText.textContent = '{% if event %}{% translate "Saving..." %}{% else %}{% translate "Creating..." %}{% endif %}';
             submitSpinner.classList.remove('hidden');
         });
     });
