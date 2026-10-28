@@ -45,6 +45,10 @@ class Homepage(InitialSetupRequiredMixin, TemplateView):
     template_name = "event/event_create.html"
 
     def post(self, request, *args, **kwargs):
+        # Honeypot field
+        if request.POST.get("contact_url"):
+            return redirect(reverse("homepage"))
+
         name = request.POST.get("name")
         description = request.POST.get("description")
         schedule_options = request.POST.getlist("schedule_options[]")

@@ -30,6 +30,13 @@
             <textarea id="description" name="description" rows="3" class="input">{{ event.description|default:'' }}</textarea>
         </div>
 
+        {% if not event %}
+        <div class="trap" aria-hidden="true">
+            <label for="contact_url">{% translate "Leave this field empty" %}</label>
+            <input type="text" id="contact_url" name="contact_url" tabindex="-1" autocomplete="off">
+        </div>
+        {% endif %}
+
         <div class="field">
             <p class="field-label">{% translate "Dates" %}</p>
             <p class="field-hint">{% translate "Pick one or more days, set a start time, then add them." %}</p>

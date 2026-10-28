@@ -13,6 +13,7 @@ class Event(models.Model):
     )
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return f"{self.name} ({self.id})"
