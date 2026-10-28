@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.views import redirect_to_login
 from django.forms import formset_factory
 from django.shortcuts import get_object_or_404, redirect, render
@@ -32,6 +33,10 @@ class NameRequiredMixin:
         return handler(request, *args, **kwargs)
 
 
+def can_edit_event(request, event):
+    return event.pk in request.session.get("created_events", [])
+
+
 class Homepage(InitialSetupRequiredMixin, TemplateView):
     template_name = "event/event_create.html"
 
@@ -44,6 +49,12 @@ class Homepage(InitialSetupRequiredMixin, TemplateView):
 
         for option in schedule_options:
             ScheduleOption.objects.create(event=event, option=option)
+
+        # Only the browser session that created the event may edit it
+        request.session["created_events"] = [
+            *request.session.get("created_events", []),
+            event.pk,
+        ]
 
         return redirect(reverse("event_detail", args=(event.pk,)))
 
@@ -62,10 +73,14 @@ class EventEdit(NameRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         event = get_object_or_404(Event, pk=kwargs["pk"])
+        if not can_edit_event(request, event):
+            raise PermissionDenied
         return render(request, self.template_name, self._context(event))
 
     def post(self, request, *args, **kwargs):
         event = get_object_or_404(Event, pk=kwargs["pk"])
+        if not can_edit_event(request, event):
+            raise PermissionDenied
         event.name = request.POST.get("name")
         event.description = request.POST.get("description")
         event.save()
@@ -92,6 +107,11 @@ class EventEdit(NameRequiredMixin, TemplateView):
 class EventDetail(NameRequiredMixin, DetailView):
     template_name = "event/event_detail.html"
     queryset = Event.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["can_edit"] = can_edit_event(self.request, self.object)
+        return context
 
     def _build_formset_data(self):
         form_data = []
